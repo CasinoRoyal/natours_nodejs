@@ -7,7 +7,16 @@ const router = express.Router();
 
 router
   .route('/5-cheapest-tour')
-  .get( tourController.getCheapestTour,tourController.getAllTours)
+  .get(tourController.getCheapestTour,tourController.getAllTours)
+
+router
+  .route('/get-stats')
+  .get(tourController.getStatsTours)
+
+router
+  .route('/month/:year')
+  .get(tourController.getMonthTours)
+
 
 router
   .route('/')
