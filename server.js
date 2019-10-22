@@ -3,6 +3,11 @@ dotenv.config({ path: './config.env' });
 const app = require('./app');
 const mongoose = require('mongoose');
 
+process.on('uncaughtException', (err) => {
+  console.log(err.name, err.message);
+
+  process.exit(1);
+});
 
 const DB = process.env.DATABASE.replace(
   '<PASSWORD>', 
@@ -17,6 +22,17 @@ mongoose.connect(DB, {
 
 const port = process.env.PORT || 8000;
 
-app.listen(port, (req, res) => {
+const server = app.listen(port, (req, res) => {
   console.log('Server start on ' + port);
 });
+
+console.log(x)
+
+process.on('unhandledRejection', (err) => {
+  console.log(err.name, err.message);
+
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
