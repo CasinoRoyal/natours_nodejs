@@ -26,8 +26,6 @@ const server = app.listen(port, (req, res) => {
   console.log('Server start on ' + port);
 });
 
-console.log(x)
-
 process.on('unhandledRejection', (err) => {
   console.log(err.name, err.message);
 
