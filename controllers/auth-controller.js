@@ -71,5 +71,18 @@ exports.protect = catchAsyncError(async (req, res, next) => {
     return next(new AppError( 'You are changed password, please log in', 401))
   };
 
+  //- Saving current user in request for next middleware
+  req.user = user;
+
   next();
 });
+
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    const { role } = req.user;
+
+    if (!roles.includes(role)) {
+      next(new AppError('Action denied', 403))
+    }
+  }
+}
