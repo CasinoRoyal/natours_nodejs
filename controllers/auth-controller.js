@@ -12,17 +12,21 @@ const generateToken = (id) => {
   });
 };
 
-exports.signup = catchAsyncError(async (req, res, next) => {
-  const newUser = await User.create(req.body);
-  const token = generateToken(newUser._id);
+const createAuthToken = (user, statusCode, res) => {
+  const token = generateToken(user._id);
 
-  res.status(201).json({
+  return res.status(statusCode).json({
     status: 'success',
     token,
     data: {
-      user: newUser
+      user
     }
   });
+};
+
+exports.signup = catchAsyncError(async (req, res, next) => {
+  const newUser = await User.create(req.body);
+  createAuthToken(newUser, 201, res);
 });
 
 exports.login = catchAsyncError(async (req, res, next) => {
@@ -38,11 +42,7 @@ exports.login = catchAsyncError(async (req, res, next) => {
     return next(new AppError('Wrong email and/or password', 401));
   };
 
-  const token = generateToken(user._id);
-  res.status(200).json({
-    status: 'success',
-    token
-  });
+  createAuthToken(user, 200, res);
 });
 
 exports.protect = catchAsyncError(async (req, res, next) => {
@@ -157,9 +157,24 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
   await user.save();
 
   //- Creating new auth token for user
-  const token = generateToken(user._id);
-  res.status(200).json({
-    status: 'success',
-    token
-  });
+  createAuthToken(newUser, 200, res);
+});
+
+exports.updatePassword = catchAsyncError(async (req, res, next) => {
+  // 1) Find user by id, grab current user id from user object
+  // We get that object from protect middleware
+  const user = await User.findById(req.user.id).select('+password');
+
+  // 2) Checkin correct current password
+  if (!(await user.isCorrectPassword(req.body.currentPassword, user.password))) {
+    return next(new AppError('Current password incorrect!', 401));
+  };
+
+  // 3) Updating password
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  await user.save();
+
+  // 4) Creating new auth token
+  createAuthToken(user, 200, res);
 });
