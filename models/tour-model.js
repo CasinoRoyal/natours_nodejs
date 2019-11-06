@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 
+const Review = require('./reviews-model')
+
 const tourSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -25,7 +27,7 @@ const tourSchema = new mongoose.Schema({
     type: String,
     required: [true, 'difficulty is required'],
     enum: {
-      values: ['easy', 'medium', 'diffucult'],
+      values: ['easy', 'medium', 'difficult'],
       message: 'It must be only: easy, medium, diffucult'
     }
   },
@@ -70,14 +72,65 @@ const tourSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now()
-  }
+  },
+  startLocation: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    coordinates: { 
+      type: [Number],
+      address: String,
+      description: String
+    }
+  },
+  locations: [
+    {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: { 
+        type: [Number],
+        address: String,
+        description: String,
+        day: Number
+      }
+    }
+  ],
+  guides: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User'
+    }
+  ]
+},
+{
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'user',
+  localField: '_id'
+});
+
+// DOCUMENT MIDDLEWARE: runs before .save() and .create()
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, {lower: true});
-  console.log(this)
   next();
-})
+});
+
+tourSchema.pre(/^find/, function(next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v'
+  });
+  next();
+}); 
 
 const Tour = mongoose.model('Tour', tourSchema);
 
