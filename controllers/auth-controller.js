@@ -95,7 +95,9 @@ exports.restrictTo = (...roles) => {
 
     if (!roles.includes(role)) {
       next(new AppError('Action denied', 403))
-    }
+    };
+
+    next();
   }
 };
 

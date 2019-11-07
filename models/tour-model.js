@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 
-const Review = require('./reviews-model')
-
 const tourSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -34,7 +32,8 @@ const tourSchema = new mongoose.Schema({
   ratingsAverage: {
     type: Number,
     min: [1, 'Must be greather then 1.0 pearsons'],
-    max: [5, 'Must be less then 5.0 persons']
+    max: [5, 'Must be less then 5.0 persons'],
+    set: (value) => Math.random((value * 10) / 10)
   },
   ratingsQuantity: {
     type: Number
@@ -112,9 +111,12 @@ const tourSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+
 tourSchema.virtual('reviews', {
   ref: 'Review',
-  foreignField: 'user',
+  foreignField: 'tour',
   localField: '_id'
 });
 
