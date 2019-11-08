@@ -31,7 +31,7 @@ const tourSchema = new mongoose.Schema({
   },
   ratingsAverage: {
     type: Number,
-    min: [1, 'Must be greather then 1.0 pearsons'],
+    min: [0, 'Must be greather then 0 pearsons'],
     max: [5, 'Must be less then 5.0 persons'],
     set: (value) => Math.random((value * 10) / 10)
   },
@@ -73,23 +73,22 @@ const tourSchema = new mongoose.Schema({
     default: Date.now()
   },
   startLocation: {
+    // GeoJSON
     type: {
       type: String,
-      enum: ['Point'],
-      default: 'Point'
+      default: 'Point',
+      enum: ['Point']
     },
-    coordinates: { 
-      type: [Number],
-      address: String,
-      description: String
-    }
+    coordinates: [Number],
+    address: String,
+    description: String
   },
   locations: [
     {
       type: {
         type: String,
-        enum: ['Point'],
-        default: 'Point'
+        default: 'Point',
+        enum: ['Point']
       },
       coordinates: { 
         type: [Number],
@@ -113,6 +112,7 @@ const tourSchema = new mongoose.Schema({
 
 tourSchema.index({ price: 1, ratingsAverage: -1 });
 tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: "2dsphere" });
 
 tourSchema.virtual('reviews', {
   ref: 'Review',

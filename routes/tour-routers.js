@@ -19,6 +19,13 @@ router
   .route('/month/:year')
   .get(protect, restrictTo('admin', 'lead-guide'), tourController.getMonthTours);
 
+router
+  .route('/tours-within/:distance/center/:coordinates/unit/:unit')
+  .get(tourController.getToursWithin);
+
+router
+  .route('/distances/:coordinates/unit/:unit')
+  .get(tourController.getToursDistances)
 
 router
   .route('/')
