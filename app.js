@@ -10,6 +10,7 @@ const hpp = require('hpp');
 const tourRouter = require('./routes/tour-routers');
 const userRouter = require('./routes/user-routers');
 const reviewRouter = require('./routes/review-routes');
+const viewRouter = require('./routes/view-routes');
 const AppError = require('./utils/app-error');
 const handleError = require('./controllers/error-controller');
 
@@ -48,10 +49,7 @@ app.use(hpp({
   ]
 }));
 
-app.get('/', (req, res) => {
-  res.status(200).render('base')
-});
-
+app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);

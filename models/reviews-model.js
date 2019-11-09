@@ -36,7 +36,7 @@ reviewSchema.index({ tour: 1, user: 1 }, { unique: true })
 reviewSchema.pre(/^find/, function(next){
   this.populate({
       path: 'user',
-      select: 'name'
+      select: 'name photo'
     })
 
   next();
@@ -50,14 +50,15 @@ reviewSchema.statics.calcAverageRating = async function(tourId) {
     {
       $group: { 
         _id: '$tour',
-        numRating: { $sum: 1 },
+        nRating: { $sum: 1 },
         avgRating: { $avg: '$rating' }
       }
     }
   ]);
+  console.log(statRating)
   if(statRating.length > 0) {
     await Tour.findByIdAndUpdate(tourId, {
-      ratingsQuantity: statRating[0].numRating,
+      ratingsQuantity: statRating[0].nRating,
       ratingsAverage: statRating[0].avgRating
     });
   } else {
