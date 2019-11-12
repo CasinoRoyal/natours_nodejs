@@ -62,6 +62,8 @@ exports.protect = catchAsyncError(async (req, res, next) => {
   //- Check if token exist
   if (authorization && authorization.startsWith('Bearer')) {
     token = authorization.split(' ')[1];
+  } else if (req.cookie.jwt) {
+    token = req.cookie.jwt
   };
 
   if (!token) {
@@ -88,6 +90,44 @@ exports.protect = catchAsyncError(async (req, res, next) => {
 
   next();
 });
+
+exports.logout = (req, res) => {
+  res.cookie('jwt', 'loggedout', {
+     expires: new Date(Date.now() + 5 * 1000),
+     httpOnly: true
+  });
+
+  res.status(200).json({ status: 'success' });
+};
+
+exports.isLoggedIn = async (req, res, next) => {
+  if (req.cookies.jwt) {
+    try {
+      //- Verification token
+      const decodeToken = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET);
+
+      //- Check if user still exist
+      const user = await User.findById(decodeToken.id);
+
+      if (!user) {
+        return next()
+      }
+
+      //- Check if user password was changed
+      if (user.isPasswordChanged(decodeToken.iat)) {
+        return next()
+      };
+
+      //- Saving current user in request for next middleware
+      res.locals.user = user;
+      return next();
+    } catch(err) {
+      return next();
+    };
+  };
+
+  next();
+};
 
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {

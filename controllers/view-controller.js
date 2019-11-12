@@ -22,3 +22,9 @@ exports.getTour = catchAsyncError(async (req, res, next) => {
     tour
   });
 });
+
+exports.getAuth = (req, res) => {
+  res.status(200).render('login', {
+    tourTitle: 'Log into your account'
+  });
+};
