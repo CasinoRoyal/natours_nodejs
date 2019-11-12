@@ -1,28 +1,51 @@
 const AppError = require('../utils/app-error');
 
-const errorDevEnv = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
-    stack: err.stack,
-    errObj: err
+const errorDevEnv = (err, req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
+    return res.status(err.statusCode).json({
+      status: err.status,
+      message: err.message,
+      stack: err.stack,
+      errObj: err
+    });
+  };
+
+  return res.status(err.statusCode).render('error', {
+    title: 'Page not found',
+    msg: err.message
   });
 };
 
-const errorProdEnv = (err, res) => {
-  if (!err.isOperational) {
-    console.error('Error', err);
+const errorProdEnv = (err, req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
+    if (!err.isOperational) {
+      console.error('Error', err);
 
-    res.status(500).json({
-      status: 'error',
-      message: 'Ctulhu is awakening. Run.'
-    });
-  } else {
-      res.status(err.statusCode).json({
-        status: err.status,
-        message: err.message
+      return res.status(500).json({
+        status: 'error',
+        message: 'Ctulhu is awakening. Run.'
       });
+    };
+
+    return res.status(err.statusCode).json({
+      status: err.status,
+      message: err.message
+    });
   };
+
+  if (!err.isOperational) {
+      console.error('Error', err);
+
+      return res.status(500).render('error', {
+        tourTitle: 'Error',
+        msg: 'Please, try again later'
+      });
+    };
+
+  return res.status(err.statusCode).render('error', {
+    tourTitle: 'Error',
+    msg: err.message
+  });
 };
 
 const handleCastErrorDB = (err) => {
@@ -52,9 +75,10 @@ module.exports = (err, req, res, next) => {
   err.status = err.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {
-    errorDevEnv(err, res);
+    errorDevEnv(err, req, res);
   } else if (process.env.NODE_ENV === 'production') {
     let error = { ...err };
+    error.message = err.message;
 
     if (error.name === 'CastError') error = handleCastErrorDB(error);
     if (error.code === 11000) error = handleDublicateErrorDB(error);
@@ -62,6 +86,6 @@ module.exports = (err, req, res, next) => {
     if (error.name === 'JsonWebTokenError') error = handleJWTError();
     if (error.name === 'TokenExpiredError') error = handleJWTExpireError();
 
-    errorProdEnv(error, res);
+    errorProdEnv(error, req, res);
   };
 };

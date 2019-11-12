@@ -62,8 +62,8 @@ exports.protect = catchAsyncError(async (req, res, next) => {
   //- Check if token exist
   if (authorization && authorization.startsWith('Bearer')) {
     token = authorization.split(' ')[1];
-  } else if (req.cookie.jwt) {
-    token = req.cookie.jwt
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt
   };
 
   if (!token) {
@@ -87,6 +87,7 @@ exports.protect = catchAsyncError(async (req, res, next) => {
 
   //- Saving current user in request for next middleware
   req.user = user;
+  res.locals.user = user;
 
   next();
 });
