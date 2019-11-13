@@ -19,7 +19,8 @@ router
 
 router
   .route('/change-user-data')
-  .patch(userController.changeUserData);
+  .patch(userController.uploadUserPhoto, userController.changeUserData);
+  //.patch(userController.uploadUserPhoto, userController.resizeUserPhoto, userController.changeUserData);
 
 router
   .route('/delete-account')

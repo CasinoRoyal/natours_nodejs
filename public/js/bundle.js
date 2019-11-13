@@ -8515,18 +8515,19 @@ var updateUserSettings = function updateUserSettings(data, type) {
           }
 
           ;
-          _context.next = 12;
+          _context.next = 13;
           break;
 
         case 9:
           _context.prev = 9;
           _context.t0 = _context["catch"](1);
+          console.log(_context.t0.response.data.message);
           (0, _alerts.showAlert)('error', _context.t0.response.data.message);
 
-        case 12:
+        case 13:
           ;
 
-        case 13:
+        case 14:
         case "end":
           return _context.stop();
       }
@@ -8837,12 +8838,11 @@ if (logOutBtn) {
 if (userDataForm) {
   userDataForm.addEventListener('submit', function (e) {
     e.preventDefault();
-    var name = document.getElementById('name').value;
-    var email = document.getElementById('email').value;
-    (0, _updateUserSettings.updateUserSettings)({
-      name: name,
-      email: email
-    }, 'data');
+    var form = new FormData();
+    form.append('name', document.getElementById('name').value);
+    form.append('email', document.getElementById('email').value);
+    form.append('photo', document.getElementById('photo').files[0]);
+    (0, _updateUserSettings.updateUserSettings)(form, 'data');
   });
 }
 
@@ -8912,7 +8912,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52017" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51233" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
