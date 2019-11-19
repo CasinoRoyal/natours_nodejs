@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('./../models/user-model');
 const catchAsyncError = require('./../utils/catch-async-error');
 const AppError = require('./../utils/app-error');
-const sendEmail = require('./../utils/emails');
+const Email = require('./../utils/emails');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -36,6 +36,9 @@ const createAuthToken = (user, statusCode, res) => {
 
 exports.signup = catchAsyncError(async (req, res, next) => {
   const newUser = await User.create(req.body);
+  const url = `${req.protocol}://${req.get('host')}/me`;
+
+  new Email(newUser, url).sendWelcome();
   createAuthToken(newUser, 201, res);
 });
 
@@ -164,13 +167,8 @@ exports.forgotPassword = catchAsyncError(async (req, res, next) => {
     \nIf it was not you, just ignore that mail.
   `;
 
-  try {
-    await sendEmail({
-      email: user.email,
-      subject: 'Password changing token',
-      message
-    });
-
+  try {  
+    new Email(user, resetUrl).sendPasswordReset()
     res.status(200).json({
       status: 'success',
       message: 'Token was send to user email'

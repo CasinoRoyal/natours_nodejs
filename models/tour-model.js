@@ -47,7 +47,7 @@ const tourSchema = new mongoose.Schema({
   },
   imageCover: {
     type: String,
-    required: [true, 'image is required']
+    default: 'default.jpg'
   },
   images: {
     type: [String]

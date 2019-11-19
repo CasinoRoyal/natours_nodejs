@@ -30,11 +30,11 @@ router
 router
   .route('/')
   .get(tourController.getAllTours)
-  .post(protect, restrictTo('admin', 'lead-guide'), tourController.createTour);
+  .post(protect, restrictTo('admin', 'lead-guide'), tourController.uploadTourPhotos, tourController.createTour);
 router
   .route('/:id')
   .get(tourController.getTour)
-  .patch(protect, restrictTo('admin', 'lead-guide'), tourController.updateTour)
+  .patch(protect, restrictTo('admin', 'lead-guide'), tourController.uploadTourPhotos, tourController.updateTour)
   .delete(protect, restrictTo('admin', 'lead-guide'), tourController.deleteTour);
 
 module.exports = router;

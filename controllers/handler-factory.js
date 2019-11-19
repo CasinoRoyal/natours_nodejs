@@ -16,6 +16,12 @@ exports.deleteOne = (Model) => catchAsyncError(async (req, res, next) => {
 });
 
 exports.updateOne = (Model) => catchAsyncError(async (req, res, next) => {
+  if (req.files) {
+    req.body.imageCover = req.files.imageCover[0].filename;
+
+    req.body.images = req.files.images.map((image) => image.filename);
+  };
+
   const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true
@@ -34,6 +40,11 @@ exports.updateOne = (Model) => catchAsyncError(async (req, res, next) => {
 });
 
 exports.createOne = (Model) => catchAsyncError(async (req, res, next) => {
+  if (req.files) {
+    req.body.imageCover = req.files.imageCover[0];
+    req.body.images = req.files.images;
+  };
+
   const doc = await Model.create(req.body);
 
   res.status(201).json({

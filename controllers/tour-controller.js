@@ -1,13 +1,48 @@
+const multer = require('multer');
 const Tour = require('../models/tour-model');
 const catchAsyncError = require('../utils/catch-async-error');
 const AppError = require('../utils/app-error');
 const factory = require('./handler-factory');
 
+
+const multerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/img/tours');
+  },
+  filename: (req, file, cb) => {
+    const fileExt = file.mimetype.split('/')[1];
+    const imageName = file.fieldname === 'imageCover' ? 
+      `tour-${req.params.id}-${Date.now()}-cover.${fileExt}`
+      : 
+      `tour-${req.params.id}-${Date.now()}.${fileExt}`;
+    
+    cb(null, imageName);
+  }
+});
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('You can upload only image file', 400), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter
+});
+
+exports.uploadTourPhotos = upload.fields([
+  { name: 'imageCover', maxCount: 1 },
+  { name: 'images', maxCount: 3 }
+]);
+
 exports.getCheapestTour = (req, res, next) => {
   req.query.limit = '5';
   req.query.sort = 'price,ratingsAverage';
   next();
-}
+};
 
 exports.getAllTours = factory.getAll(Tour);
 exports.getTour = factory.getOne(Tour, { path: 'reviews' });

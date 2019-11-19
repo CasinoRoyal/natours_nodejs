@@ -4,6 +4,8 @@ const catchAsyncError = require('./../utils/catch-async-error');
 const AppError = require('./../utils/app-error');
 const factory = require('./handler-factory');
 
+//const multerStorage = multer.memoryStorage();
+
 const multerStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'public/img/users');
@@ -13,8 +15,6 @@ const multerStorage = multer.diskStorage({
     cb(null, `user-${req.user.id}-${Date.now()}.${fileExt}`);
   }
 });
-
-//const multerStorage = multer.memoryStorage();
 
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image')) {
@@ -53,21 +53,6 @@ exports.getMe = (req, res, next) => {
 
   next();
 };
-
-// exports.resizeUserPhoto = (req, res, next) => {
-//   if (!req.file) return next();
-
-//   req.file.filename = `user-${req.user.id}-${Date.now()}.jpg`;
-  
-//   gm(req.file.buffer)
-//     .write(`public/img/users/${req.file.filename}`,
-//      (err) =>{
-//        if (err) console.log('12341', err)
-//        else console.log('no err')
-//      })
-
-//   next();
-// };
 
 exports.changeUserData = catchAsyncError(async (req, res, next) => {
   if (req.body.password) {
